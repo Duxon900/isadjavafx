@@ -19,7 +19,14 @@ version = '0.0.1'
 group = 'ehu.isad'
 
 // ext.moduleName = 'gradlejavafxhelloworld'
-mainClassName = "$moduleName/ehu.isad.App"
+mainClassName = "$moduleName/ehu.isad.Txanpona"
+
+
+dependencies {
+    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'junit:junit:4.12'
+}
+
 
 
 javafx {
