@@ -4,51 +4,48 @@ import com.google.gson.Gson;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
+import javax.sound.sampled.LineUnavailableException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashMap;
+import java.util.List;
 
 public class ComboBoxAdv extends Application {
 
     public class Liburuak{
 
-        String title;
-        int number_of_pages;
-        String details;
-        String isbn;
-
-
-        public Liburuak(String izena, String isbn){
-            this.title=izena;
-            this.isbn=isbn;
-        }
-
+        String ISBN;
+        String info_url;
+        String bib_key;
+        String preview_url;
+        String thumbnail_url;
+        LiburuAtributu details;
+        String preview;
 
         @Override
         public String toString() {
             return "Liburuak{" +
-                    ", title='" + title + '\'' +
-                    ", number_of_pages=" + number_of_pages +
-                    ", details='" + details + '\'' +
+                    "info_url='" + info_url + '\'' +
+                    ", bib_key='" + bib_key + '\'' +
+                    ", preview_url='" + preview_url + '\'' +
+                    ", thumbnail_url='" + thumbnail_url + '\'' +
+                    ", details=" + details +
+                    ", preview='" + preview + '\'' +
                     '}';
-        }
-
-        public String getTitle(){
-            return this.title;
-        }
-
-        public String getIsbn(){
-            return this.isbn;
         }
 
     }
@@ -59,42 +56,31 @@ public class ComboBoxAdv extends Application {
 
         primaryStage.setTitle("OpenLibrary APIa aztertzen");
 
+        //Combobox
         ComboBox comboBox = new ComboBox();
-
-
-
-        Label label=new Label("izenak");
-
-        ObservableList<Liburuak> liburuList = FXCollections.observableArrayList();
-        liburuList.addAll(
-                new Liburuak("Blockchain: Blueprint for a New Economy","9781491920497"),
-                new Liburuak("R for Data Science","1491910399"),
-                new Liburuak("Fluent Python","1491946008"),
-                new Liburuak("Natural Language Processing with PyTorch","1491978236"),
-                new Liburuak("Data Algorithms","9781491906187")
+        comboBox.getItems().addAll(
+                "Blockchain: Blueprint for a New Economy",
+                "R for Data Science",
+                "Fluent Python",
+                "Natural Language Processing with PyTorch",
+                "Data Algorithms"
         );
-
-        comboBox.setItems(liburuList);
         comboBox.setEditable(false);
 
-        comboBox.setConverter(new StringConverter<Liburuak>() {
 
+        //HashMap liburuekin
+        HashMap<String,String> liburuLista=new HashMap<>();  //Key , value
 
-            @Override
-            public String toString(Liburuak object) {
-                if(object==null){
-                    return "";
-                }
-                else return object.getIsbn();
-            }
+        liburuLista.put("Blockchain: Blueprint for a New Economy","9781491920497");
+        liburuLista.put("R for Data Science","1491910399");
+        liburuLista.put("Fluent Python","1491946008");
+        liburuLista.put("Natural Language Processing with PyTorch","1491978236");
+        liburuLista.put("Data Algorithms","9781491906187");
 
-            @Override
-            public Liburuak fromString(String izena) {
-                return null;
-                // return (Argazki) comboBox.getItems().stream().filter(o -> ((Argazki)o).getIzena().equals(izena)).findFirst().orElse(null);
-            }
+        //Testua
+        Text text = new Text();
+        text.wrappingWidthProperty().set(400);
 
-        });
 
         comboBox.valueProperty().addListener((obs, oldval, newval) -> {
             System.out.println(oldval);
@@ -103,18 +89,26 @@ public class ComboBoxAdv extends Application {
         });
 
         comboBox.setOnAction(e -> {
-            Liburuak datuak=readFromUrl((String)comboBox.getValue());
+            System.out.println(comboBox.getValue());
+            String titulua=(String)comboBox.getValue();
 
-            label.setText(datuak.toString());
+
+            Liburuak datuak=readFromUrl(liburuLista.get(titulua));
+
+            text.setText("Idazlea(k): "+datuak.details.getPublishers()+
+                    "\nOrri kopurua: "+datuak.details.getNumber_of_pages()+
+                    "\nIzenburua: "+datuak.details.getTitle());
         });
 
 
-        HBox hbox = new HBox();
-        hbox.getChildren().addAll(comboBox,label);
-        hbox.setAlignment(Pos.BASELINE_CENTER);
+        //HBox eratzen
+        VBox vbox = new VBox();
+        vbox.getChildren().addAll(comboBox,text);
+        vbox.setAlignment(Pos.BASELINE_CENTER);
+        vbox.setPadding(new Insets(50,0,50,0));
 
 
-        Scene scene = new Scene(hbox, 200, 120);
+        Scene scene = new Scene(vbox, 500, 400);
         primaryStage.setScene(scene);
         primaryStage.show();
 
@@ -128,11 +122,13 @@ public class ComboBoxAdv extends Application {
             URL isbnWeb= new URL("https://openlibrary.org/api/books?bibkeys=ISBN:"+isbn+"&jscmd=details&format=json");
             URLConnection iw= isbnWeb.openConnection();
             BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(iw.getInputStream()));
-            new InputStreamReader(isbnWeb.openStream());
-
             inputLine=bufferedReader.readLine();
             bufferedReader.close();
 
+            String[] zatitu;//{"ISBN:9781491906187":
+            zatitu = inputLine.split("\"ISBN:"+isbn+"\": "); //{ jartzen bada errorea ematen du
+
+            inputLine=zatitu[1].substring(0,zatitu[1].length()-1);
         }
         catch(IOException e){
             e.printStackTrace();
