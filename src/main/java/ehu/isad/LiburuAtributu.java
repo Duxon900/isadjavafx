@@ -3,12 +3,14 @@ package ehu.isad;
 import java.util.Arrays;
 
 public class LiburuAtributu {
+
+    String isbn;
     String[] publishers;
     String title;
     int number_of_pages;
 
-    public LiburuAtributu(String titleA,int number_of_pagesA){
-        this.number_of_pages=number_of_pagesA;
+    public LiburuAtributu(String titleA,String isbnA){
+        this.isbn=isbnA;
         this.title=titleA;
     }
 
@@ -31,6 +33,10 @@ public class LiburuAtributu {
 
     public String getPublishers(){
         return Arrays.toString(publishers);
+    }
+
+    public String getIsbn(){
+        return isbn;
     }
 
 }

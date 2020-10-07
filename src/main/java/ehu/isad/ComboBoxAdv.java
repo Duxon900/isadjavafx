@@ -28,7 +28,6 @@ public class ComboBoxAdv extends Application {
 
     public class Liburuak{
 
-        String ISBN;
         String info_url;
         String bib_key;
         String preview_url;
@@ -59,41 +58,56 @@ public class ComboBoxAdv extends Application {
         //Combobox
         ComboBox comboBox = new ComboBox();
         comboBox.getItems().addAll(
-                "Blockchain: Blueprint for a New Economy",
-                "R for Data Science",
-                "Fluent Python",
-                "Natural Language Processing with PyTorch",
-                "Data Algorithms"
+                new LiburuAtributu("Blockchain: Blueprint for a New Economy","9781491920497"),
+                new LiburuAtributu("R for Data Science","1491910399"),
+                new LiburuAtributu("Fluent Python","1491946008"),
+                new LiburuAtributu("Natural Language Processing with PyTorch","1491978236"),
+                new LiburuAtributu("Data Algorithms","9781491906187")
         );
         comboBox.setEditable(false);
 
 
-        //HashMap liburuekin
-        HashMap<String,String> liburuLista=new HashMap<>();  //Key , value
+        //comboBox.setConverter();
 
-        liburuLista.put("Blockchain: Blueprint for a New Economy","9781491920497");
-        liburuLista.put("R for Data Science","1491910399");
-        liburuLista.put("Fluent Python","1491946008");
-        liburuLista.put("Natural Language Processing with PyTorch","1491978236");
-        liburuLista.put("Data Algorithms","9781491906187");
+
+        //HashMap liburuekin
+//        HashMap<String,String> liburuLista=new HashMap<>();  //Key , value
+//
+//        liburuLista.put("Blockchain: Blueprint for a New Economy","9781491920497");
+//        liburuLista.put("R for Data Science","1491910399");
+//        liburuLista.put("Fluent Python","1491946008");
+//        liburuLista.put("Natural Language Processing with PyTorch","1491978236");
+//        liburuLista.put("Data Algorithms","9781491906187");
 
         //Testua
         Text text = new Text();
         text.wrappingWidthProperty().set(400);
 
 
+        //comboBox properties
         comboBox.valueProperty().addListener((obs, oldval, newval) -> {
             System.out.println(oldval);
             System.out.println(newval);
 
         });
 
+        comboBox.setConverter(new StringConverter<LiburuAtributu>() {
+            @Override
+            public String toString(LiburuAtributu object) {
+                if (object==null) return null;
+                else return object.getTitle();
+            }
+
+            @Override
+            public LiburuAtributu fromString(String string) {
+                return null;
+            }
+        });
+
         comboBox.setOnAction(e -> {
-            System.out.println(comboBox.getValue());
-            String titulua=(String)comboBox.getValue();
+            LiburuAtributu libLag=(LiburuAtributu) comboBox.getValue();
 
-
-            Liburuak datuak=readFromUrl(liburuLista.get(titulua));
+            Liburuak datuak=readFromUrl(libLag.getIsbn());
 
             text.setText("Idazlea(k): "+datuak.details.getPublishers()+
                     "\nOrri kopurua: "+datuak.details.getNumber_of_pages()+
